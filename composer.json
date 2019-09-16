@@ -1,0 +1,9 @@
+{
+    "name": "denis303/codeigniter4-user-service",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "denis303\\codeigniter4\\" : ""
+        }
+    }
+}
