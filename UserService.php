@@ -3,6 +3,7 @@
 namespace denis303\codeigniter4;
 
 use Exception;
+use CodeIgniter\Model;
 
 class UserService
 {
@@ -67,7 +68,7 @@ class UserService
 
     public function isGuest() : bool
     {
-        return $this->getId() ? false : true;
+        return $this->getEntity() ? false : true;
     }
 
     /**
