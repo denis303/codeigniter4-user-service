@@ -50,6 +50,11 @@ class UserService
                 $model = $this->getModel();
 
                 $this->_entity = $model->find($id);
+
+                if (!$this->_entity)
+                {
+                    $this->logout();
+                }
             }
         }
 
