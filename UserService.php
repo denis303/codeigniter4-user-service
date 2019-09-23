@@ -2,123 +2,142 @@
 
 namespace denis303\codeigniter4;
 
-use Exception;
-use CodeIgniter\Model;
-
-class UserService
+class UserService extends BaseUserService
 {
 
-    const SESSION_INDEX = 'user_id';
+    const NOT_REMEMBER_SESSION = 'user_not_remember';
 
-    protected $_modelClass;
+    const NOT_REMEMBER_COOKIE = 'user_not_remember';
 
-    protected $_session;
+    protected $_appConfig;
 
-    protected $_id;
-
-    protected $_entity;
-
-    protected $_model;
-
-    public function __construct(object $session, string $modelClass)
+    public function __construct(string $modelClass, object $session, object $appConfig)
     {
-        $this->_session = $session;
+        parent::__construct($modelClass, $session);
 
-        $this->_modelClass = $modelClass;
-    }
-
-    public function getModel()
-    {
-        if (!$this->_model)
-        {
-            $modelClass = $this->_modelClass;
-
-            $this->_model = new $modelClass;
-        }
-
-        return $this->_model;
-    }
-
-    public function getEntity()
-    {
-        if (!$this->_entity)
-        {
-            $id = $this->getId();
-            
-            if ($id)
-            {
-                $model = $this->getModel();
-
-                $this->_entity = $model->find($id);
-
-                if (!$this->_entity)
-                {
-                    $this->logout();
-                }
-            }
-        }
-
-        return $this->_entity;
+        $this->_appConfig = $appConfig;
     }
 
     public function getId()
     {
-        if (!$this->_id)
+        $id = parent::getId();
+
+        if ($id)
         {
-            $this->_id = $this->_session->get(static::SESSION_INDEX);
+            $token = $this->_session->get(static::NOT_REMEMBER_SESSION);
+
+            if ($token)
+            {
+                $cookieToken = $this->getNotRememberCookie();
+
+                if ($cookieToken != $token)
+                {
+                    $this->logout();
+                
+                    $id = $this->_id;
+                }
+            }
         }
 
-        return $this->_id;
+        return $id;
     }
 
-    public function isGuest() : bool
+    public function login($user, $rememberMe = true, &$error = null)
     {
-        return $this->getEntity() ? false : true;
-    }
+        $return = parent::login($user, true, $error);
 
-    /**
-     * Logs in a user using the provided username and password.
-     *
-     * @return bool whether the user is logged in successfully
-     */
-    public function login($user, $rememberMe = false, & $error = null)
-    {
-        if (!$user)
+        if (!$rememberMe)
         {
-            throw new Exception('User not found.');
-        }
+            $token = $this->generateToken();
 
-        $model = $this->getModel();
-
-        $primaryKey = $model->primaryKey;
-
-        $returnType = $model->returnType;
-
-        if ($returnType == 'array')
-        {
-            $id = $user[$primaryKey];
+            $this->_session->set(static::NOT_REMEMBER_SESSION, $token);
+        
+            $this->setNotRememberCookie($token);
         }
         else
         {
-            $id = $user->$primaryKey;
+            $this->_session->remove(static::NOT_REMEMBER_SESSION);
+
+            $this->deleteNotRememberCookie();
         }
 
-        $this->_session->set(static::SESSION_INDEX, $id);
+        return $return;
+    }
 
-        $this->_id = $id;
+    public function generateToken()
+    {
+        return md5(time() . rand(0, PHP_INT_MAX)); 
+    }
 
-        $this->_entity = $user;
+    public function getNotRememberCookie()
+    {
+        helper('cookie');
 
-        return true;
+        return get_cookie(static::NOT_REMEMBER_COOKIE);
+    }
+
+    /**
+     *  Set "not remember me" cookie
+     *
+     *  Not working in Chrome, where:
+     *
+     *  1. On Startup = Continue where you left off
+     *  2. Continue running background apps when Google Chrome is closed = On
+     *
+     */
+    public function setNotRememberCookie(string $value)
+    {
+        // CodeIgniter not send cookies for redirect response in RC1?
+
+        setcookie(
+            $this->_appConfig->cookiePrefix . static::NOT_REMEMBER_COOKIE,
+            $value,
+            0,
+            $this->_appConfig->cookiePath,
+            $this->_appConfig->cookieDomain,
+            false, // secure
+            false // httponly
+        );
+
+        /*
+
+        TODO: This is code valid, but not working in CodeIgniter 4 RC1
+
+        helper('cookie');
+
+        set_cookie(
+            static::NOT_REMEMBER_COOKIE,
+            $value,
+            0,
+            $this->_appConfig->cookieDomain,
+            $this->_appConfig->cookiePath,
+            $this->_appConfig->cookiePrefix,
+            false, // only send over HTTPS
+            false // hide from Javascript
+        );
+
+        */
+    }
+
+    public function deleteNotRememberCookie()
+    {
+        helper('cookie');
+
+        delete_cookie(
+            static::NOT_REMEMBER_COOKIE, 
+            $this->_appConfig->cookieDomain, 
+            $this->_appConfig->cookiePath, 
+            $this->_appConfig->cookiePrefix
+        );
     }
 
     public function logout()
     {
-        $this->_session->remove(static::SESSION_INDEX);
-    
-        $this->_id = null;
+        parent::logout();
 
-        $this->_entity = null;
+        $this->_session->remove(static::NOT_REMEMBER_SESSION);
+
+        $this->deleteNotRememberCookie();
     }
 
 }
