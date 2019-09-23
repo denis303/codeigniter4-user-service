@@ -87,21 +87,11 @@ class UserService extends BaseUserService
      */
     public function setNotRememberCookie(string $value)
     {
-        // CodeIgniter not send cookies for redirect response in RC1?
-
-        setcookie(
-            $this->_appConfig->cookiePrefix . static::NOT_REMEMBER_COOKIE,
-            $value,
-            0,
-            $this->_appConfig->cookiePath,
-            $this->_appConfig->cookieDomain,
-            false, // secure
-            false // httponly
-        );
-
         /*
 
-        TODO: This is code valid, but not working in CodeIgniter 4 RC1
+        CodeIgniter 4 rc1 does not send cookies where a response is redirect?
+
+        ToDo: This code is valid, but not working in CodeIgniter 4 rc1, check it later.
 
         helper('cookie');
 
@@ -116,7 +106,17 @@ class UserService extends BaseUserService
             false // hide from Javascript
         );
 
-        */
+        */ 
+
+        setcookie(
+            $this->_appConfig->cookiePrefix . static::NOT_REMEMBER_COOKIE,
+            $value,
+            0,
+            $this->_appConfig->cookiePath,
+            $this->_appConfig->cookieDomain,
+            false, // secure
+            false // httponly
+        );
     }
 
     public function deleteNotRememberCookie()
