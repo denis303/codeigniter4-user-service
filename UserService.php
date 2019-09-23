@@ -89,9 +89,9 @@ class UserService extends BaseUserService
     {
         /*
 
-        CodeIgniter 4 rc1 does not send cookies where a response is redirect?
+        CodeIgniter 4 rc.1 does not send cookies where controller response is redirect?
 
-        ToDo: This code is valid, but not working in CodeIgniter 4 rc1, check it later.
+        ToDo: This code is valid, but not working, check it later.
 
         helper('cookie');
 
@@ -106,8 +106,8 @@ class UserService extends BaseUserService
             false // hide from Javascript
         );
 
-        */ 
-
+        */
+        
         setcookie(
             $this->_appConfig->cookiePrefix . static::NOT_REMEMBER_COOKIE,
             $value,
