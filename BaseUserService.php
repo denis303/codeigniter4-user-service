@@ -70,10 +70,10 @@ class BaseUserService
 
     public function isGuest() : bool
     {
-        return $this->getEntity() ? false : true;
+        return $this->getUser() ? false : true;
     }
 
-    public function getEntity()
+    public function getUser()
     {
         if (!$this->_entity)
         {
