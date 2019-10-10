@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @author denis303 <mail@denis303.com>
+ * @license MIT
+ * @link http://denis303.com
+ */
 namespace denis303\codeigniter4;
 
 use Exception;
@@ -92,7 +96,7 @@ class BaseUserService
     {
         if (!$this->_entity)
         {
-            $id = $this->getCurrentUserId();
+            $id = $this->getId();
             
             if ($id)
             {

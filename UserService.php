@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @author denis303 <mail@denis303.com>
+ * @license MIT
+ * @link http://denis303.com
+ */
 namespace denis303\codeigniter4;
 
 class UserService extends BaseUserService
@@ -32,14 +36,14 @@ class UserService extends BaseUserService
                 {
                     $this->logout();
                 
-                    $id = $this->_id;
+                    return null;
                 }
             }
         }
 
         return $id;
     }
-    
+
     public function login($user, $rememberMe = true, &$error = null)
     {
         $return = parent::login($user, true, $error);
@@ -85,16 +89,10 @@ class UserService extends BaseUserService
      */
     public function setNotRememberCookie(string $value)
     {
-        /*
-
-        CodeIgniter 4 rc.1 does not send cookies where controller response is redirect?
-
-        ToDo: This code is valid, but not working, check it later.
-
         helper('cookie');
 
         set_cookie(
-            static::NOT_REMEMBER_COOKIE,
+            static::ID_SESSION . static::NOT_REMEMBER_SUFFIX,
             $value,
             0,
             $this->_appConfig->cookieDomain,
@@ -102,18 +100,6 @@ class UserService extends BaseUserService
             $this->_appConfig->cookiePrefix,
             false, // only send over HTTPS
             false // hide from Javascript
-        );
-
-        */
-        
-        setcookie(
-            $this->_appConfig->cookiePrefix . static::ID_SESSION . static::NOT_REMEMBER_SUFFIX,
-            $value,
-            0,
-            $this->_appConfig->cookiePath,
-            $this->_appConfig->cookieDomain,
-            false, // secure
-            false // httponly
         );
     }
 
