@@ -39,7 +39,7 @@ class UserService extends BaseUserService
 
         return $id;
     }
-
+    
     public function login($user, $rememberMe = true, &$error = null)
     {
         $return = parent::login($user, true, $error);

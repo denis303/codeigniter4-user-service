@@ -33,12 +33,17 @@ class BaseUserService
 
         if (!$rememberMe)
         {
-            throw new Exception('Not implemended.');
+            throw new Exception('Not implemented.');
         }
 
         $model = new $this->_modelClass;
 
         $primaryKey = $model->primaryKey;
+
+        if (!$primaryKey)
+        {
+            throw new Exception($this->_modelClass . '::$primaryKey is required.');
+        }
 
         if (is_array($user))
         {
@@ -47,6 +52,11 @@ class BaseUserService
         else
         {
             $id = $user->$primaryKey;
+        }
+
+        if (!$id)
+        {
+            throw new Exception('User ID not defined.');
         }
 
         $this->_session->set(static::ID_SESSION, $id);
@@ -82,13 +92,11 @@ class BaseUserService
     {
         if (!$this->_entity)
         {
-            $id = $this->getId();
+            $id = $this->getCurrentUserId();
             
             if ($id)
             {
-                $model = new $this->_modelClass;
-
-                $this->_entity = $model->find($id);
+                $this->_entity = $this->findUserById($id);
 
                 if (!$this->_entity)
                 {
@@ -107,6 +115,13 @@ class BaseUserService
         $this->_id = null;
 
         $this->_entity = null;
+    }
+
+    public function findUserById($id)
+    {
+        $model = new $this->_modelClass;
+
+        return $model->find($id);
     }
 
 }
