@@ -5,9 +5,7 @@ namespace denis303\codeigniter4;
 class UserService extends BaseUserService
 {
 
-    const NOT_REMEMBER_SESSION = 'user_not_remember';
-
-    const NOT_REMEMBER_COOKIE = 'user_not_remember';
+    const NOT_REMEMBER_SUFFIX = '_not_remember';
 
     protected $_appConfig;
 
@@ -24,7 +22,7 @@ class UserService extends BaseUserService
 
         if ($id)
         {
-            $token = $this->_session->get(static::NOT_REMEMBER_SESSION);
+            $token = $this->_session->get(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
 
             if ($token)
             {
@@ -50,13 +48,13 @@ class UserService extends BaseUserService
         {
             $token = $this->generateToken();
 
-            $this->_session->set(static::NOT_REMEMBER_SESSION, $token);
+            $this->_session->set(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX, $token);
         
             $this->setNotRememberCookie($token);
         }
         else
         {
-            $this->_session->remove(static::NOT_REMEMBER_SESSION);
+            $this->_session->remove(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
 
             $this->deleteNotRememberCookie();
         }
@@ -73,7 +71,7 @@ class UserService extends BaseUserService
     {
         helper('cookie');
 
-        return get_cookie(static::NOT_REMEMBER_COOKIE);
+        return get_cookie(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
     }
 
     /**
@@ -109,7 +107,7 @@ class UserService extends BaseUserService
         */
         
         setcookie(
-            $this->_appConfig->cookiePrefix . static::NOT_REMEMBER_COOKIE,
+            $this->_appConfig->cookiePrefix . static::ID_SESSION . static::NOT_REMEMBER_SUFFIX,
             $value,
             0,
             $this->_appConfig->cookiePath,
@@ -124,7 +122,7 @@ class UserService extends BaseUserService
         helper('cookie');
 
         delete_cookie(
-            static::NOT_REMEMBER_COOKIE, 
+            static::ID_SESSION . static::NOT_REMEMBER_SUFFIX, 
             $this->_appConfig->cookieDomain, 
             $this->_appConfig->cookiePath, 
             $this->_appConfig->cookiePrefix
@@ -135,7 +133,7 @@ class UserService extends BaseUserService
     {
         parent::logout();
 
-        $this->_session->remove(static::NOT_REMEMBER_SESSION);
+        $this->_session->remove(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
 
         $this->deleteNotRememberCookie();
     }

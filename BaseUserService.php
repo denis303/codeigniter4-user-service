@@ -73,6 +73,11 @@ class BaseUserService
         return $this->getUser() ? false : true;
     }
 
+    public function getModelClass()
+    {
+        return $this->_modelClass;
+    }
+
     public function getUser()
     {
         if (!$this->_entity)
@@ -102,6 +107,6 @@ class BaseUserService
         $this->_id = null;
 
         $this->_entity = null;
-    }    
+    }
 
 }
