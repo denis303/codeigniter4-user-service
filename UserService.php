@@ -6,18 +6,20 @@
  */
 namespace denis303\codeigniter4;
 
+use Denis303\CodeIgniter\NotRememberMe;
+
 class UserService extends BaseUserService
 {
 
     const NOT_REMEMBER_SUFFIX = '_not_remember';
 
-    protected $_appConfig;
+    protected $_notRememberMe;
 
-    public function __construct(string $modelClass, object $session, object $appConfig)
+    public function __construct(string $modelClass, object $session)
     {
         parent::__construct($modelClass, $session);
 
-        $this->_appConfig = $appConfig;
+        $this->_notRememberMe = new NotRememberMe(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
     }
 
     public function getId()
@@ -26,18 +28,13 @@ class UserService extends BaseUserService
 
         if ($id)
         {
-            $token = $this->_session->get(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
-
-            if ($token)
+            if (!$this->_notRememberMe->validateToken())
             {
-                $cookieToken = $this->getNotRememberCookie();
+                $this->logout();
+            
+                $this->_notRememberMe->deleteToken();
 
-                if ($cookieToken != $token)
-                {
-                    $this->logout();
-                
-                    return null;
-                }
+                return null;
             }
         }
 
@@ -49,79 +46,22 @@ class UserService extends BaseUserService
         $return = parent::login($user, true, $error);
 
         if (!$rememberMe)
-        {
-            $token = $this->generateToken();
-
-            $this->_session->set(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX, $token);
-        
-            $this->setNotRememberCookie($token);
+        {        
+            $this->_notRememberMe->createToken();
         }
         else
         {
-            $this->_session->remove(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
-
-            $this->deleteNotRememberCookie();
+            $this->_notRememberMe->deleteToken();
         }
 
         return $return;
     }
-
-    public function generateToken()
-    {
-        return md5(time() . rand(0, PHP_INT_MAX)); 
-    }
-
-    public function getNotRememberCookie()
-    {
-        helper('cookie');
-
-        return get_cookie(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
-    }
-
-    /**
-     *  Set "not remember me" cookie
-     *
-     *  Not working in Chrome, where:
-     *
-     *  1. On Startup = Continue where you left off
-     *  2. Continue running background apps when Google Chrome is closed = On
-     *
-     */
-    public function setNotRememberCookie(string $value)
-    {
-        helper('cookie');
-
-        set_cookie(
-            static::ID_SESSION . static::NOT_REMEMBER_SUFFIX,
-            $value,
-            0,
-            $this->_appConfig->cookieDomain,
-            $this->_appConfig->cookiePath,
-            $this->_appConfig->cookiePrefix,
-            false, // only send over HTTPS
-            false // hide from Javascript
-        );
-    }
-
-    public function deleteNotRememberCookie()
-    {
-        helper('cookie');
-
-        delete_cookie(
-            static::ID_SESSION . static::NOT_REMEMBER_SUFFIX, 
-            $this->_appConfig->cookieDomain, 
-            $this->_appConfig->cookiePath, 
-            $this->_appConfig->cookiePrefix
-        );
-    }
-
+ 
     public function logout()
     {
         parent::logout();
 
-        $this->_session->remove(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
-
-        $this->deleteNotRememberCookie();
+        $this->_notRememberMe->deleteToken();
     }
 
 }
