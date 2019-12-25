@@ -47,7 +47,7 @@ class UserService extends BaseUserService
 
         if (!$rememberMe)
         {        
-            $this->_notRememberMe->createToken();
+            $this->_notRememberMe->setToken();
         }
         else
         {
