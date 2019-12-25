@@ -15,9 +15,9 @@ class UserService extends BaseUserService
 
     protected $_notRememberMe;
 
-    public function __construct(string $modelClass, object $session)
+    public function __construct(string $modelClass)
     {
-        parent::__construct($modelClass, $session);
+        parent::__construct($modelClass);
 
         $this->_notRememberMe = new NotRememberMe(static::ID_SESSION . static::NOT_REMEMBER_SUFFIX);
     }

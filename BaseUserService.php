@@ -7,6 +7,7 @@
 namespace denis303\codeigniter4;
 
 use Exception;
+use Config\Services;
 
 class BaseUserService
 {
@@ -21,11 +22,11 @@ class BaseUserService
 
     protected $_entity;    
 
-    public function __construct(string $modelClass, object $session)
+    public function __construct(string $modelClass)
     {
         $this->_modelClass = $modelClass;
 
-        $this->_session = $session;
+        $this->_session = Services::session();
     }
 
     public function login($user, bool $rememberMe = true, &$error = null)
